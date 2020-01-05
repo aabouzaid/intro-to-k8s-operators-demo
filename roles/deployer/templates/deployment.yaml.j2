@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ instance.name }}-{{ instance.version }}
+  namespace: {{ instance.namespace }}
+  labels: {{ instance.labels }}
+spec:
+  selector:
+    matchLabels: {{ instance.labels }}
+  replicas: {{ instance.replicas }}
+  template:
+    metadata:
+      labels: {{ instance.labels }}
+    spec:
+      containers:
+      - name: {{ instance.image }}
+        image: {{ instance.image }}:{{ instance.version }}
+        ports:
+        - name: http
+          containerPort: 80

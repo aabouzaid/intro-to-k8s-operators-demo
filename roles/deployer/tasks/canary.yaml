@@ -1,0 +1,73 @@
+---
+- name: Set main vars
+  set_fact:
+    deployment_labels: |
+      {% for key, val in deployment.labels.items() %}
+        {{ key }}={{ val }}{{ ',' if not loop.last else '' }}
+      {% endfor %}
+    deployment_fullname: "{{ deployment.name }}-{{ deployment.version }}"
+
+- name: Get current deployment info
+  set_fact:
+    current_deployment: |
+      {{ lookup('k8s', kind='Deployment', namespace=meta.namespace, label_selector=deployment_labels) }}
+
+
+#
+# Initial deployment.
+- name: Rollout initial deployment if there is no previous version
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'deployment.yaml.j2') }}"
+  with_items:
+    - "{{ deployment }}"
+  loop_control:
+    loop_var: instance
+  when: not current_deployment
+
+- name: End playbook if after initial deployment
+  meta: end_play
+  when: not current_deployment
+
+
+#
+# Rollout new deployment.
+- name: Deploy new version
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'deployment.yaml.j2') }}"
+  with_items:
+    - "{{ deployment | combine({'replicas': 0}) }}"
+  loop_control:
+    loop_var: instance
+  when: current_deployment and current_deployment.metadata.name != deployment_fullname
+
+- name: Run canary steps to scale up/down new/old deployments
+  include_tasks: canary_steps.yaml
+  loop: "{{ steps }}"
+  loop_control:
+    loop_var: step
+    extended: yes
+  when: current_deployment and current_deployment.metadata.name != deployment_fullname
+  register: new_version_deployed
+
+
+#
+# Cleanup.
+- name: Remove old deployment if rollout is succeeded
+  k8s:
+    api_version: v1
+    kind: Deployment
+    name: "{{ current_deployment.metadata.name }}"
+    namespace: "{{ current_deployment.metadata.namespace }}"
+    state: absent
+  when: current_deployment and current_deployment.metadata.name != deployment_fullname and new_version_deployed is succeeded
+
+- name: Remove new deployment if rollout is failed
+  k8s:
+    api_version: v1
+    kind: Deployment
+    name: "{{ deployment.name }}"
+    namespace: "{{ deployment.namespace }}"
+    state: absent
+  when: new_version_deployed is failed

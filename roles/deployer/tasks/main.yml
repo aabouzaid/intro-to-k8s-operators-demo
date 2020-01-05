@@ -1,0 +1,5 @@
+---
+# tasks file for deployer
+- name: Canary deployment
+  include: canary.yaml
+  when: type == "canary"

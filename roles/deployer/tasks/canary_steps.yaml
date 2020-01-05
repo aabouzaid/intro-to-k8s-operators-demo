@@ -1,0 +1,39 @@
+- name: Set step replicas
+  set_fact:
+    deployer_custom_resource: "{{ _deploy_example_com_deployer }}"
+    step_replicas: "{{ (step.percent / deployment.replicas) | int }} "
+    step_sleep: "{{ step.sleep | default(0) }}"
+
+- name: Scale up new deployment
+  k8s_scale:
+    api_version: v1
+    kind: Deployment
+    name: "{{ deployment_fullname }}"
+    namespace: "{{ deployment.namespace }}"
+    replicas: "{{ step_replicas }}"
+    wait_timeout: 60
+
+- name: Scale down current deployment
+  k8s_scale:
+    api_version: v1
+    kind: Deployment
+    name: "{{ current_deployment.metadata.name }}"
+    namespace: "{{ current_deployment.metadata.namespace }}"
+    replicas: "{{ deployment.replicas - step_replicas | int }}"
+    wait_timeout: 60
+
+- name: Update deployer status
+  k8s_status:
+    api_version: "{{ deployer_custom_resource.apiVersion }}"
+    kind: "{{ deployer_custom_resource.kind }}"
+    name: "{{ meta.name }}"
+    namespace: "{{ meta.namespace }}"
+    status:
+      progress:
+        step: "no. {{ ansible_loop.index }}"
+        percentage: "{{ step.percent }}% has been deployed"
+        wait: "{{ step_sleep }}s till next step"
+
+- name: Wait before next step
+  wait_for:
+    timeout: "{{ step_sleep }}"

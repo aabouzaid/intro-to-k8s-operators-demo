@@ -1,0 +1,5 @@
+---
+- version: v1alpha1
+  group: deploy.example.com
+  kind: Deployer
+  playbook: /opt/ansible/playbook.yaml
