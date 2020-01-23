@@ -11,6 +11,7 @@ spec:
     version: 1.7.7
     labels:
       app: nginx
+      operator: deployer
     replicas: 10
   steps:
     - percent: 10

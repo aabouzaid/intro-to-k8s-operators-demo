@@ -8,7 +8,7 @@
   k8s_scale:
     api_version: v1
     kind: Deployment
-    name: "{{ deployment_fullname }}"
+    name: "{{ new_deployment_name }}"
     namespace: "{{ deployment.namespace }}"
     replicas: "{{ step_replicas }}"
     wait_timeout: 60
@@ -17,10 +17,13 @@
   k8s_scale:
     api_version: v1
     kind: Deployment
-    name: "{{ current_deployment.metadata.name }}"
-    namespace: "{{ current_deployment.metadata.namespace }}"
+    name: "{{ old_deployment_name }}"
+    namespace: "{{ meta.namespace }}"
     replicas: "{{ deployment.replicas - step_replicas | int }}"
     wait_timeout: 60
+  loop_control:
+    loop_var: old_deployment_name
+  loop: "{{ old_deployments_names }}"
 
 - name: Update deployer status
   k8s_status:

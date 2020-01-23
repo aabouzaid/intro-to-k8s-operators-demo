@@ -93,6 +93,7 @@ spec:
     version: 1.7.7
     labels:
       app: nginx
+      operator: deployer
     replicas: 10
   steps:
     - percent: 10
@@ -195,5 +196,5 @@ http://localhost:8686/metrics
 
 ### Extend
 Try to extend this operator functionalities like:
-- Add more options to each `step` like posting step status on Slack or calling a webhook (you can use [webhook.site](https://webhook.site/) for testing).
+- Add more options to each `step` like checking Prometheus metrics, posting step status on Slack, or calling a webhook (you can use [webhook.site](https://webhook.site/) for testing).
 - Use Ansible's [Helm module](https://docs.ansible.com/ansible/latest/modules/helm_module.html) to install Nginx instead J2 template file.
