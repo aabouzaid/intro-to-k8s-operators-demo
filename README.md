@@ -1,5 +1,7 @@
 <!-- omit in toc -->
 # Intro to Kubernetes operators demo
+[![Build Status](https://travis-ci.org/AAbouZaid/intro-to-k8s-operators-demo.svg?branch=master)](https://travis-ci.org/AAbouZaid/intro-to-k8s-operators-demo)
+
 This is a pretty simple demo but beyond "hello world" for "Introduction to Kubernetes Operators" session.
 
 **Note:** This Kubernetes operator is just for demo purposes, so it's not for real use. For production, use [Argo Rollouts](https://argoproj.github.io/argo-rollouts/).
