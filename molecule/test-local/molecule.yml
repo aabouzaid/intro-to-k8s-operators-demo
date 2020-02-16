@@ -31,6 +31,9 @@ provisioner:
     group_vars:
       all:
         namespace: ${TEST_NAMESPACE:-osdk-test}
+        deploy_dir: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/deploy"
+        operator_definition: "{{ lookup('template', '/'.join([deploy_dir, 'operator.yaml'])) | regex_replace('v\\d+\\.\\d+\\.\\d+','testing') }}"
+        custom_resource_definition: "{{ lookup('file', '/'.join([deploy_dir, 'crds/deploy.example.com_v1alpha1_deployer_cr.yaml'])) }}"
   env:
     K8S_AUTH_KUBECONFIG: /tmp/molecule/kind-test-local/kubeconfig
     KUBECONFIG: /tmp/molecule/kind-test-local/kubeconfig

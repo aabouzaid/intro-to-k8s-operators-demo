@@ -3,7 +3,8 @@
 - name: Build Operator in Kubernetes docker container
   hosts: k8s
   vars:
-    image_name: deploy.example.com/deployer-operator:testing
+    image_name: deployer-operator:testing
+
   tasks:
   # using command so we don't need to install any dependencies
   - name: Get existing image hash
@@ -21,17 +22,16 @@
   connection: local
   vars:
     ansible_python_interpreter: '{{ ansible_playbook_python }}'
-    deploy_dir: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/deploy"
     pull_policy: Never
-    REPLACE_IMAGE: deploy.example.com/deployer-operator:testing
-    custom_resource: "{{ lookup('file', '/'.join([deploy_dir, 'crds/deploy.example.com_v1alpha1_deployer_cr.yaml'])) | from_yaml }}"
+    custom_resource_init: "{{ custom_resource_definition | from_yaml | combine({'spec': {'deployment': {'namespace': namespace, 'version': '1.7.7'}}}, recursive=True) }}"
+    custom_resource: "{{ custom_resource_definition | from_yaml | combine({'spec': {'deployment': {'namespace': namespace, 'version': '1.7.8'}}}, recursive=True) }}"
   tasks:
   - block:
     - name: Delete the Operator Deployment
       k8s:
         state: absent
         namespace: '{{ namespace }}'
-        definition: "{{ lookup('template', '/'.join([deploy_dir, 'operator.yaml'])) }}"
+        definition: "{{ operator_definition }}"
       register: delete_deployment
       when: hostvars[groups.k8s.0].build_cmd.changed
 
@@ -42,7 +42,7 @@
         namespace: '{{ namespace }}'
         name: '{{ definition.metadata.name }}'
       vars:
-        definition: "{{ lookup('template', '/'.join([deploy_dir, 'operator.yaml'])) | from_yaml }}"
+        definition: "{{ operator_definition | from_yaml }}"
       register: deployment
       until: not deployment.resources
       delay: 3
@@ -52,7 +52,17 @@
     - name: Create the Operator Deployment
       k8s:
         namespace: '{{ namespace }}'
-        definition: "{{ lookup('template', '/'.join([deploy_dir, 'operator.yaml'])) }}"
+        definition: "{{ operator_definition }}"
+
+    - name: Create the init deploy.example.com/v1alpha1.Deployer
+      k8s:
+        state: present
+        namespace: '{{ namespace }}'
+        definition: '{{ custom_resource_init }}'
+
+    - name: Sleep till init version is deployed
+      wait_for:
+        timeout: 10
 
     - name: Create the deploy.example.com/v1alpha1.Deployer
       k8s:
@@ -60,7 +70,7 @@
         namespace: '{{ namespace }}'
         definition: '{{ custom_resource }}'
 
-    - name: Wait 2m for reconciliation to run
+    - name: Wait for reconciliation to run
       k8s_info:
         api_version: '{{ custom_resource.apiVersion }}'
         kind: '{{ custom_resource.kind }}'
@@ -69,7 +79,7 @@
       register: cr
       until:
       - "'Successful' in (cr | json_query('resources[].status.conditions[].reason'))"
-      delay: 12
+      delay: 30
       retries: 10
     rescue:
     - name: debug cr
@@ -85,19 +95,6 @@
           resource_name=custom_resource.metadata.name
         )}}'
 
-    - name: debug memcached lookup
-      ignore_errors: yes
-      failed_when: false
-      debug:
-        var: deploy
-      vars:
-        deploy: '{{ lookup("k8s",
-          kind="Deployment",
-          api_version="apps/v1",
-          namespace=namespace,
-          label_selector="app=memcached"
-        )}}'
-
     - name: get operator logs
       ignore_errors: yes
       failed_when: false
@@ -105,7 +102,7 @@
       environment:
         KUBECONFIG: '{{ lookup("env", "KUBECONFIG") }}'
       vars:
-        definition: "{{ lookup('template', '/'.join([deploy_dir, 'operator.yaml'])) | from_yaml }}"
+        definition: "{{ operator_definition | from_yaml }}"
       register: log
 
     - debug: var=log.stdout_lines
