@@ -27,6 +27,11 @@ However, Kubernetes doesn't have a way to control the deployment, e.g. canary de
 
 So this operator demonstrates how to extend Kubernetes functionality natively by adding a new resource kind called `Deployer` to provide more deployment styles.
 
+<p>
+Here is a visual overview how this operator works:
+<div class="separator" style="clear: both; text-align: center; padding: 1em 0"><a href="https://4.bp.blogspot.com/-plyL5J_c-HU/XuVfVkSkiCI/AAAAAAAAbKw/0gFsf2Ft_xoRnVNsV0iQBDwyO1K2v02jACPcBGAYYCw/s1600/ansible-based-k8s-operator-overview.gif" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="https://4.bp.blogspot.com/-plyL5J_c-HU/XuVfVkSkiCI/AAAAAAAAbKw/0gFsf2Ft_xoRnVNsV0iQBDwyO1K2v02jACPcBGAYYCw/s640/ansible-based-k8s-operator-overview.gif" width="640" height="384" data-original-width="1600" data-original-height="961" /></a></div>
+</p>
+
 ### How it's created
 This is an Ansible based operator using [Operator-SDK](https://github.com/operator-framework/operator-sdk) which provides 3 types of Kubernetes operators ... Helm, Ansible, and Go.
 
