@@ -29,7 +29,7 @@ So this operator demonstrates how to extend Kubernetes functionality natively by
 
 <p>
 Here is a visual overview how this operator works:
-<div class="separator" style="clear: both; text-align: center; padding: 1em 0"><a href="https://4.bp.blogspot.com/-plyL5J_c-HU/XuVfVkSkiCI/AAAAAAAAbKw/0gFsf2Ft_xoRnVNsV0iQBDwyO1K2v02jACPcBGAYYCw/s1600/ansible-based-k8s-operator-overview.gif" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="https://4.bp.blogspot.com/-plyL5J_c-HU/XuVfVkSkiCI/AAAAAAAAbKw/0gFsf2Ft_xoRnVNsV0iQBDwyO1K2v02jACPcBGAYYCw/s640/ansible-based-k8s-operator-overview.gif" width="640" height="384" data-original-width="1600" data-original-height="961" /></a></div>
+<div class="separator" style="clear: both; text-align: center; padding: 1em 0"><a href="https://1.bp.blogspot.com/-FlFVB7qIYWI/X3IBGcao17I/AAAAAAAAcu0/gVDno7zoQxc7aE8DfTYQsbzkDn5hCQimACLcBGAsYHQ/s1600/ansible-based-k8s-operator-overview-v1.1.gif" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" src="https://1.bp.blogspot.com/-FlFVB7qIYWI/X3IBGcao17I/AAAAAAAAcu0/gVDno7zoQxc7aE8DfTYQsbzkDn5hCQimACLcBGAsYHQ/s640/ansible-based-k8s-operator-overview-v1.1.gif" width="640" height="384" data-original-width="1600" data-original-height="961" /></a></div>
 </p>
 
 ### How it's created
